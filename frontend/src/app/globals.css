@@ -35,3 +35,13 @@ body {
 h1, h2, h3, h4, h5, h6, .font-title {
   font-family: var(--font-title); /* Automatically applies Space Grotesk to all headings */
 }
+
+button.primary {
+  background-color: var(--color-primary); /* Ensures buttons use primary color */
+  color: var(--color-foreground); /* Ensures button text uses foreground color */
+  font-family: var(--font-body); /* Ensures buttons use Inter */
+}
+
+.text-primary {
+  color: var(--color-primary); /* Utility class for primary text */
+} 

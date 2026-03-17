@@ -12,6 +12,20 @@ export async function registerAction(formData) {
   return await res.json();
 }
 
+export async function loginAction(email, password) {
+  try {
+    const result = await signIn("credentials", {
+      email,
+      password,
+      redirect: false, // We handle redirect in the component
+    });
+
+    return result;
+  } catch (error) {
+    return { error: "Authentication failed" };
+  }
+}
+
 export async function verifyEmailAction(token) {
   const res = await fetch(`${BACKEND_URL}/api/auth/verify-email`, {
     method: "POST",

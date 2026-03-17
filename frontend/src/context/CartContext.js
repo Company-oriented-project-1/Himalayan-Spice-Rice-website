@@ -5,23 +5,26 @@ import { CheckCircle2 } from 'lucide-react';
 export const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
-  const [cart, setCart] = useState([]);
+  const [cart, setCart] = useState(() => {
+    if (typeof window === 'undefined') return [];
+    try {
+      const saved = window.localStorage.getItem('himalayan_cart');
+      return saved ? JSON.parse(saved) : [];
+    } catch (e) {
+      console.error('Failed to parse cart');
+      return [];
+    }
+  });
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState(null);
   const [isLoaded, setIsLoaded] = useState(false); // Tracks if client-side load is done
 
-  // 1. Safely load from LocalStorage ONLY on the client side after mount
-  useEffect(() => {
-    const saved = localStorage.getItem('himalayan_cart');
-    if (saved) {
-      try { 
-        setCart(JSON.parse(saved)); 
-      } catch (e) { 
-        console.error('Failed to parse cart'); 
-      }
+    useEffect(() => {
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem('himalayan_cart', JSON.stringify(cart));
     }
-    setIsLoaded(true);
-  }, []);
+  }, [cart]);
+  
 
   // 2. Save to LocalStorage whenever cart changes (but only AFTER the initial load)
   useEffect(() => {
