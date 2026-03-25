@@ -1,60 +1,57 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "../api/auth/[...nextauth]/route";
-import { redirect } from "next/navigation";
-import { LogoutButton } from "@/components/AuthComponents";
+import { getAdminDashboardDetailsAction } from "@/lib/actions";
 
-export default async function DashboardPage() {
-  // Check session on the server
-  const session = await getServerSession(authOptions);
+export default async function AdminDashboardPage() {
+  const dashboardResult = await getAdminDashboardDetailsAction();
+  const details = dashboardResult?.data || null;
 
-  // If no session exists, redirect to login
-  if (!session) {
-    redirect("/login");
-  }
+  const stats = {
+    totalUsers: details?.totalUsers ?? 0,
+    totalProducts: details?.totalProducts ?? 0,
+    totalOrders: details?.totalOrders ?? 0,
+    pendingOrders: details?.pendingOrders ?? 0
+  };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-4xl mx-auto">
-        <header className="flex justify-between items-center mb-8 bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">User Dashboard</h1>
-            <p className="text-gray-500">Welcome back, {session.user.name}</p>
-          </div>
-          <LogoutButton />
-        </header>
+    <div className="space-y-8">
+      <header>
+        <p className="text-xs uppercase tracking-[0.18em] text-red-800">Admin Dashboard</p>
+        <h2 className="font-title mt-2 text-3xl font-bold text-stone-900 md:text-4xl">Control Center</h2>
+        <p className="mt-2 max-w-2xl text-stone-600">
+          Monitor platform activity and manage core modules from one place.
+        </p>
+      </header>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-            <h3 className="font-semibold text-gray-700 mb-2">Account Details</h3>
-            <div className="space-y-2 text-sm text-gray-600">
-              <p><strong>Email:</strong> {session.user.email}</p>
-              <p>
-                <strong>Role:</strong> 
-                <span className={`ml-2 px-2 py-1 rounded text-xs font-bold ${
-                  session.user.role === 'ADMIN' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'
-                }`}>
-                  {session.user.role}
-                </span>
-              </p>
-            </div>
-          </div>
+      <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <article className="rounded-2xl border border-red-200 bg-gradient-to-br from-red-50 to-white p-5 shadow-sm">
+          <p className="text-xs uppercase tracking-[0.16em] text-red-800">Total Users</p>
+          <p className="mt-3 text-3xl font-bold text-red-900">{stats.totalUsers}</p>
+        </article>
 
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-            <h3 className="font-semibold text-gray-700 mb-2">Recent Activity</h3>
-            <p className="text-sm text-gray-500 italic">No recent orders found.</p>
-          </div>
-        </div>
+        <article className="rounded-2xl border border-amber-200 bg-gradient-to-br from-amber-50 to-white p-5 shadow-sm">
+          <p className="text-xs uppercase tracking-[0.16em] text-amber-800">Total Products</p>
+          <p className="mt-3 text-3xl font-bold text-amber-900">{stats.totalProducts}</p>
+        </article>
 
-        {session.user.role === "ADMIN" && (
-          <div className="mt-8 bg-orange-50 border border-orange-200 p-6 rounded-xl">
-            <h3 className="font-bold text-orange-800 mb-2">Admin Panel Access</h3>
-            <p className="text-orange-700 text-sm mb-4">You have administrative privileges. You can manage products and view all orders.</p>
-            <button className="bg-orange-600 text-white px-4 py-2 rounded text-sm hover:bg-orange-700 transition">
-              Go to Admin Console
-            </button>
-          </div>
+        <article className="rounded-2xl border border-stone-200 bg-gradient-to-br from-stone-100 to-white p-5 shadow-sm">
+          <p className="text-xs uppercase tracking-[0.16em] text-stone-700">Total Orders</p>
+          <p className="mt-3 text-3xl font-bold text-stone-900">{stats.totalOrders}</p>
+        </article>
+
+        <article className="rounded-2xl border border-orange-200 bg-gradient-to-br from-orange-50 to-white p-5 shadow-sm">
+          <p className="text-xs uppercase tracking-[0.16em] text-orange-800">Pending Orders</p>
+          <p className="mt-3 text-3xl font-bold text-orange-900">{stats.pendingOrders}</p>
+        </article>
+      </section>
+
+      <section className="rounded-2xl border border-stone-200 bg-white/90 p-6 shadow-sm">
+        <h3 className="font-title text-lg font-semibold text-stone-900">Status</h3>
+        <p className="mt-2 text-sm text-stone-600">
+          Dashboard is connected to backend admin stats. Product and order metrics stay at zero until those schemas and APIs are added.
+        </p>
+        {dashboardResult?.error && (
+          <p className="mt-3 text-sm font-medium text-red-700">{dashboardResult.error}</p>
         )}
-      </div>
+      </section>
     </div>
   );
 }

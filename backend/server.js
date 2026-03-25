@@ -6,6 +6,7 @@ const { swaggerUi, specs } = require('./swagger');
 
 // Import authentication routes
 const authRoutes = require('./routes/authRoutes');
+const adminRoutes = require('./routes/adminRoutes');
 
 const app = express();
 
@@ -19,6 +20,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 // API Routes
 // This connects your authRoutes to the /api/auth prefix
 app.use('/api/auth', authRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Root Route
 app.get("/", (req, res) => {

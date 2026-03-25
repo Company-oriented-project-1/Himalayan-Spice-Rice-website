@@ -18,6 +18,23 @@ exports.register = async (req, res) => {
   try {
     const { email, password, name } = req.body;
     
+    // Validate inputs
+    if (!email || !password || !name) {
+      return res.status(400).json({ message: "Email, password, and name are required" });
+    }
+    
+    if (name.trim().length < 2) {
+      return res.status(400).json({ message: "Name must be at least 2 characters long" });
+    }
+    
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({ message: "Invalid email format" });
+    }
+    
+    if (password.length < 6) {
+      return res.status(400).json({ message: "Password must be at least 6 characters long" });
+    }
+    
     // Check if user exists
     const existing = await prisma.user.findUnique({ where: { email } });
     if (existing) return res.status(400).json({ message: "User already exists" });
@@ -34,13 +51,12 @@ exports.register = async (req, res) => {
       }
     });
 
-    // const verifyUrl = `${process.env.FRONTEND_URL}/verify-email?token=${vToken}`;
+        // const verifyUrl = `${process.env.FRONTEND_URL}/verify-email?token=${vToken}`;
     // await sendEmail(email, "Verify Your Email - Himalayan Spice", `
     //   <h1>Welcome ${name}!</h1>
     //   <p>Please verify your email by clicking the link below:</p>
     //   <a href="${verifyUrl}">${verifyUrl}</a>
     // `);
-
     res.status(201).json({ message: "Success! Please check your email to verify account." });
   } catch (err) {
     console.error(err);
@@ -114,4 +130,32 @@ exports.forgotPassword = async (req, res) => {
 //   `);
 
   res.json({ message: "Reset link sent to your email." });
+};
+
+// Add this to your authController.js
+exports.getProfile = async (req, res) => {
+  try {
+    // Since verifyToken already ran, we have req.user.id
+    const user = await prisma.user.findUnique({
+      where: { id: req.user.id },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        isVerified: true,
+        createdAt: true,
+        // Do NOT select the password field
+      }
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json(user);
+  } catch (err) {
+    console.error("Profile Fetch Error:", err);
+    res.status(500).json({ message: "Internal server error" });
+  }
 };

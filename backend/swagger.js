@@ -19,8 +19,8 @@ const options = {
       securitySchemes: {
         bearerAuth: {
           type: 'http',
-          scheme: 'bearer',
-          bearerFormat: 'JWT',
+          scheme: 'basic',
+          description: 'Use email as username and account password as password',
         },
       },
     },

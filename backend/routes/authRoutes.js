@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/authController');
+const { verifyToken } = require('../middleware/authMiddleware');
+
 
 /**
  * @swagger
@@ -112,5 +114,24 @@ router.post('/verify-email', authController.verifyEmail);
  *         description: User not found
  */
 router.post('/forgot-password', authController.forgotPassword);
+
+
+
+/**
+ * @swagger
+ * /api/auth/profile:
+ *   get:
+ *     summary: Get user profile
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: User profile retrieved successfully
+ *       401:
+ *         description: Unauthorized, token missing or invalid
+ */
+router.get('/profile', verifyToken, authController.getProfile);
+
 
 module.exports = router;
