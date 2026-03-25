@@ -2,6 +2,7 @@ import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 
 export const authOptions = {
+  secret: process.env.NEXTAUTH_SECRET, 
   // Use JWT strategy because we are using an external backend API
   session: { 
     strategy: "jwt",
