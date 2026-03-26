@@ -11,23 +11,24 @@ export default function HomePage() {
   const router = useRouter();
   const heroData = [
     {
-      id: 1,
-      image: "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=2000",
-      title: "The Essence of the Himalayas, Delivered.",
-      description: "Authentic Asian groceries, premium basmati rice, and exotic spices. Order online and pick up fresh at our store."
-    },
-    {
-      id: 2,
-      image: "https://images.unsplash.com/photo-1599599810694-b5ac4dd26212?auto=format&fit=crop&q=80&w=2000",
-      title: "Premium Spices Collection",
-      description: "Handpicked spices sourced directly from the Himalayas for authentic flavors."
-    },
-    {
-      id: 3,
-      image: "https://images.unsplash.com/photo-1556912173-3bb297f45b83?auto=format&fit=crop&q=80&w=2000",
-      title: "Golden Basmati Rice",
-      description: "Experience the finest quality basmati rice, perfect for every occasion."
-    }
+    id: 1,
+    image: "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=2000",
+    title: "Authentic Flavors from the Himalayas",
+    description: "Discover premium Asian groceries, aromatic basmati rice, and handpicked spices — all in one place."
+  },
+  {
+    id: 2,
+    image: "https://images.unsplash.com/photo-1606787366850-de6330128bfc?auto=format&fit=crop&q=80&w=2000",
+    title: "Quality You Can Trust, Prices You’ll Love",
+    description: "Shop top-quality groceries at affordable prices with exclusive deals every day."
+  },
+  {
+  id: 3,
+  image: "https://images.pexels.com/photos/7363072/pexels-photo-7363072.jpeg?auto=compress&cs=tinysrgb&w=2000",
+  title: "Fast Delivery or Easy Store Pickup",
+  description: "Order online and get fresh groceries delivered to your doorstep or pick them up conveniently at our store."
+}
+
   ];
 
   const [currentSlide, setCurrentSlide] = React.useState(0);
