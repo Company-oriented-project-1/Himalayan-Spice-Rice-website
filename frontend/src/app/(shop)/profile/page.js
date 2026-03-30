@@ -100,15 +100,17 @@ export default async function ProfilePage() {
 
         {/* Admin Section (Conditional) */}
         {user.role === 'ADMIN' && (
-          <div className="mt-6 bg-red-900 rounded-3xl p-8 shadow-lg text-white">
-            <div className="flex items-center justify-between">
+          <div className="mt-6 bg-red-800 rounded-3xl p-8 shadow-lg text-white">
+            <div className="flex items-center justify-between gap-4">
               <div>
                 <h2 className="text-xl font-bold">Admin Dashboard</h2>
                 <p className="text-red-200 text-sm">Access store management and inventory tools.</p>
               </div>
-              <Button className="bg-white text-red-900 hover:bg-stone-100">
-                Go to Admin
-              </Button>
+              <form action="/admin" method="get">
+                <Button type="submit" variant="primary" className="whitespace-nowrap border-none">
+                  Go to Admin
+                </Button>
+              </form>
             </div>
           </div>
         )}

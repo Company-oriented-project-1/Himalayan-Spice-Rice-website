@@ -2,7 +2,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const { PrismaClient } = require('@prisma/client');
-// const { sendEmail } = require('../utils/emailService');
+const { sendVerificationEmail, sendPasswordResetEmail } = require('../utils/emailService');
 
 const prisma = new PrismaClient({
   // Use the library engine explicitly
@@ -41,22 +41,25 @@ exports.register = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const vToken = crypto.randomBytes(32).toString('hex');
+    const tokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    const verificationEmailSentAt = new Date();
 
-    await prisma.user.create({
+    const user = await prisma.user.create({
       data: { 
         email, 
         password: hashedPassword, 
         name, 
-        verificationToken: vToken 
+        verificationToken: vToken,
+        tokenExpires,
+        verificationEmailSentAt
       }
     });
 
-        // const verifyUrl = `${process.env.FRONTEND_URL}/verify-email?token=${vToken}`;
-    // await sendEmail(email, "Verify Your Email - Himalayan Spice", `
-    //   <h1>Welcome ${name}!</h1>
-    //   <p>Please verify your email by clicking the link below:</p>
-    //   <a href="${verifyUrl}">${verifyUrl}</a>
-    // `);
+    const emailResult = await sendVerificationEmail(user.email, vToken);
+    if (emailResult.previewUrl) {
+      console.log('Verification email preview URL:', emailResult.previewUrl);
+    }
+
     res.status(201).json({ message: "Success! Please check your email to verify account." });
   } catch (err) {
     console.error(err);
@@ -67,16 +70,25 @@ exports.register = async (req, res) => {
 // 2. VERIFY EMAIL
 exports.verifyEmail = async (req, res) => {
   try {
-    const { token } = req.body;
-    const user = await prisma.user.findFirst({ where: { verificationToken: token } });
+    const { token } = req.params;
+    const user = await prisma.user.findFirst({
+      where: {
+        verificationToken: token,
+        tokenExpires: {
+          gt: new Date()
+        }
+      }
+    });
+
     if (!user) return res.status(400).json({ message: "Invalid or expired token" });
 
     await prisma.user.update({
       where: { id: user.id },
-      data: { isVerified: true, verificationToken: null }
+      data: { isVerified: true, verificationToken: null, tokenExpires: null }
     });
     res.json({ message: "Email verified successfully!" });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: "Verification failed" });
   }
 };
@@ -111,25 +123,96 @@ exports.login = async (req, res) => {
 
 // 4. FORGOT PASSWORD
 exports.forgotPassword = async (req, res) => {
-  const { email } = req.body;
-  const user = await prisma.user.findUnique({ where: { email } });
-  if (!user) return res.status(404).json({ message: "User not found" });
+  try {
+    const { email } = req.body;
 
-  const rToken = crypto.randomBytes(32).toString('hex');
-  const expiry = new Date(Date.now() + 3600000); // 1 hour
+    if (!email) {
+      return res.status(400).json({ message: "Email is required" });
+    }
 
-  await prisma.user.update({
-    where: { email },
-    data: { resetToken: rToken, resetTokenExpiry: expiry }
-  });
+    const user = await prisma.user.findUnique({ where: { email } });
 
-//   const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${rToken}`;
-//   await sendEmail(email, "Reset Password - Himalayan Spice", `
-//     <p>You requested a password reset. Click the link below:</p>
-//     <a href="${resetUrl}">Reset Password</a>
-//   `);
+    if (user) {
+      const now = new Date();
+      if (user.passwordResetEmailSentAt) {
+        const elapsedMs = now.getTime() - new Date(user.passwordResetEmailSentAt).getTime();
+        const minIntervalMs = 60 * 1000;
 
-  res.json({ message: "Reset link sent to your email." });
+        if (elapsedMs < minIntervalMs) {
+          const waitSeconds = Math.ceil((minIntervalMs - elapsedMs) / 1000);
+          return res.status(429).json({ message: `Please wait ${waitSeconds}s before requesting another reset email.` });
+        }
+      }
+
+      const rToken = crypto.randomBytes(32).toString('hex');
+      const expiry = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+
+      await prisma.user.update({
+        where: { email },
+        data: { resetToken: rToken, resetTokenExpiry: expiry, passwordResetEmailSentAt: now }
+      });
+
+      const emailResult = await sendPasswordResetEmail(email, rToken);
+      if (emailResult.previewUrl) {
+        console.log('Password reset email preview URL:', emailResult.previewUrl);
+      }
+    }
+
+    // Return a generic message to avoid revealing whether the email exists.
+    return res.json({ message: "If an account exists for this email, a reset link has been sent." });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "Failed to process forgot password request" });
+  }
+};
+
+// 5. RESET PASSWORD
+exports.resetPassword = async (req, res) => {
+  try {
+    const { token } = req.params;
+    const { password, confirmPassword } = req.body;
+
+    if (!password || !confirmPassword) {
+      return res.status(400).json({ message: "Password and confirm password are required" });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({ message: "Password must be at least 6 characters long" });
+    }
+
+    if (password !== confirmPassword) {
+      return res.status(400).json({ message: "Passwords do not match" });
+    }
+
+    const user = await prisma.user.findFirst({
+      where: {
+        resetToken: token,
+        resetTokenExpiry: {
+          gt: new Date()
+        }
+      }
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: "Invalid or expired reset token" });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        password: hashedPassword,
+        resetToken: null,
+        resetTokenExpiry: null
+      }
+    });
+
+    return res.json({ message: "Password has been reset successfully." });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "Password reset failed" });
+  }
 };
 
 // Add this to your authController.js
@@ -157,5 +240,58 @@ exports.getProfile = async (req, res) => {
   } catch (err) {
     console.error("Profile Fetch Error:", err);
     res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// 2.1 RESEND VERIFICATION EMAIL
+exports.resendVerification = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ message: "Email is required" });
+    }
+
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (user.isVerified) {
+      return res.status(400).json({ message: "Your email is already verified. Please login." });
+    }
+
+    const now = new Date();
+    if (user.verificationEmailSentAt) {
+      const elapsedMs = now.getTime() - new Date(user.verificationEmailSentAt).getTime();
+      const minIntervalMs = 60 * 1000;
+
+      if (elapsedMs < minIntervalMs) {
+        const waitSeconds = Math.ceil((minIntervalMs - elapsedMs) / 1000);
+        return res.status(429).json({ message: `Please wait ${waitSeconds}s before requesting another verification email.` });
+      }
+    }
+
+    const verificationToken = crypto.randomBytes(32).toString('hex');
+    const tokenExpires = new Date(now.getTime() + 60 * 60 * 1000); // 1 hour
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        verificationToken,
+        tokenExpires,
+        verificationEmailSentAt: now
+      }
+    });
+
+    const emailResult = await sendVerificationEmail(user.email, verificationToken);
+    if (emailResult.previewUrl) {
+      console.log('Resend verification email preview URL:', emailResult.previewUrl);
+    }
+
+    return res.json({ message: "New link sent! Check your inbox (and spam folder)." });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "Failed to resend verification email" });
   }
 };

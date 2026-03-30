@@ -69,9 +69,29 @@ router.post('/login', authController.login);
 
 /**
  * @swagger
- * /api/auth/verify-email:
- *   post:
+ * /api/auth/verify/{token}:
+ *   get:
  *     summary: Verify user email with token
+ *     tags: [Auth]
+ *     parameters:
+ *       - in: path
+ *         name: token
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Email verified successfully
+ *       400:
+ *         description: Invalid or expired token
+ */
+router.get('/verify/:token', authController.verifyEmail);
+
+/**
+ * @swagger
+ * /api/auth/resend-verification:
+ *   post:
+ *     summary: Resend verification email for unverified users
  *     tags: [Auth]
  *     requestBody:
  *       required: true
@@ -79,17 +99,19 @@ router.post('/login', authController.login);
  *         application/json:
  *           schema:
  *             type: object
- *             required: [token]
+ *             required: [email]
  *             properties:
- *               token:
+ *               email:
  *                 type: string
  *     responses:
  *       200:
- *         description: Email verified successfully
+ *         description: Verification email sent
  *       400:
- *         description: Invalid or expired token
+ *         description: Already verified or invalid request
+ *       429:
+ *         description: Too many resend attempts
  */
-router.post('/verify-email', authController.verifyEmail);
+router.post('/resend-verification', authController.resendVerification);
 
 /**
  * @swagger
@@ -110,10 +132,42 @@ router.post('/verify-email', authController.verifyEmail);
  *     responses:
  *       200:
  *         description: Reset link sent to email
- *       404:
- *         description: User not found
+ *       429:
+ *         description: Too many reset requests
  */
 router.post('/forgot-password', authController.forgotPassword);
+
+/**
+ * @swagger
+ * /api/auth/reset-password/{token}:
+ *   post:
+ *     summary: Reset password using a reset token
+ *     tags: [Auth]
+ *     parameters:
+ *       - in: path
+ *         name: token
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [password, confirmPassword]
+ *             properties:
+ *               password:
+ *                 type: string
+ *               confirmPassword:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Password reset successful
+ *       400:
+ *         description: Invalid input or expired token
+ */
+router.post('/reset-password/:token', authController.resetPassword);
 
 
 

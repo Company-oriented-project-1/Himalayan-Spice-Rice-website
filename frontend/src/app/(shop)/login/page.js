@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { signIn, useSession } from "next-auth/react";
 import { Button } from "@/components/ui/Button";
+import { resendVerificationAction } from "@/lib/actions";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -14,6 +15,10 @@ export default function LoginPage() {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [status, setStatus] = useState({ type: "", message: "" });
   const [loading, setLoading] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendMessage, setResendMessage] = useState("");
+
+  const showResend = status.type === "error" && status.message === "Please verify your email first";
 
   // Automatically redirect if the session context detects the user is logged in
   useEffect(() => {
@@ -26,6 +31,7 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
     setStatus({ type: "", message: "" });
+    setResendMessage("");
 
     try {
       /**
@@ -58,6 +64,29 @@ export default function LoginPage() {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleResendVerification = async () => {
+    if (!formData.email) {
+      setResendMessage("Enter your email address first.");
+      return;
+    }
+
+    setResendLoading(true);
+    setResendMessage("");
+
+    try {
+      const result = await resendVerificationAction(formData.email);
+      if (result?.message?.toLowerCase().includes("new link sent")) {
+        setResendMessage("New link sent! Check your inbox (and spam folder)");
+      } else {
+        setResendMessage(result?.message || "Unable to resend verification email.");
+      }
+    } catch (_error) {
+      setResendMessage("Unable to resend verification email right now.");
+    } finally {
+      setResendLoading(false);
     }
   };
 
@@ -115,6 +144,14 @@ export default function LoginPage() {
                 }
                 className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-orange-500 focus:border-orange-500 text-black"
               />
+              <div className="mt-2 text-right">
+                <Link
+                  href="/forgot-password"
+                  className="text-xs font-medium text-red-800 hover:text-red-900"
+                >
+                  Forgot password?
+                </Link>
+              </div>
             </div>
 
             {status.message && (
@@ -126,6 +163,24 @@ export default function LoginPage() {
                 }`}
               >
                 {status.message}
+                {showResend && (
+                  <div className="mt-2 text-sm">
+                    Didn&apos;t get the link?{" "}
+                    <button
+                      type="button"
+                      onClick={handleResendVerification}
+                      disabled={resendLoading}
+                      className="font-semibold underline underline-offset-2 disabled:opacity-60"
+                    >
+                      {resendLoading ? "Sending..." : "Resend Email"}
+                    </button>
+                  </div>
+                )}
+                {resendMessage && (
+                  <div className={`mt-2 text-xs ${resendMessage.toLowerCase().includes("new link sent") ? "text-green-700" : "text-red-700"}`}>
+                    {resendMessage}
+                  </div>
+                )}
               </div>
             )}
 
@@ -141,7 +196,7 @@ export default function LoginPage() {
           <div className="mt-6 text-center">
             <Link
               href="/register"
-              className="text-sm font-medium text-orange-600 hover:text-orange-500 transition-colors"
+              className="text-sm font-medium hover:text-orange-500 transition-colors"
             >
               Do not have an account? Register
             </Link>

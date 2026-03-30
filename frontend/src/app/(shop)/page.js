@@ -176,9 +176,13 @@ export default function HomePage() {
                 className="group cursor-pointer bg-white rounded-2xl p-4 sm:p-6 text-center border border-stone-100 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 relative overflow-hidden"
               >
                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-800 to-amber-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
-                <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto bg-stone-50 rounded-full flex items-center justify-center text-3xl sm:text-4xl mb-4 group-hover:scale-110 transition-transform duration-300">
-                  {category.icon}
-                </div>
+                <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto rounded-full overflow-hidden mb-4 group-hover:scale-110 transition-transform duration-300">
+  <img
+    src={category.image}
+    alt={category.name}
+    className="w-full h-full object-cover"
+  />
+</div>
                 <h3 className="font-bold text-stone-800 group-hover:text-red-800 transition-colors">{category.name}</h3>
               </div>
             ))}

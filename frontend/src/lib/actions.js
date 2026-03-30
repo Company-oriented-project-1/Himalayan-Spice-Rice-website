@@ -31,10 +31,17 @@ export async function loginAction(email, password) {
 }
 
 export async function verifyEmailAction(token) {
-  const res = await fetch(`${BACKEND_URL}/api/auth/verify-email`, {
+  const res = await fetch(`${BACKEND_URL}/api/auth/verify/${encodeURIComponent(token)}`, {
+    method: "GET",
+  });
+  return await res.json();
+}
+
+export async function resendVerificationAction(email) {
+  const res = await fetch(`${BACKEND_URL}/api/auth/resend-verification`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ token }),
+    body: JSON.stringify({ email }),
   });
   return await res.json();
 }
@@ -45,6 +52,17 @@ export async function forgotPasswordAction(email) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email }),
   });
+  const data = await res.json();
+  return { ok: res.ok, status: res.status, ...data };
+}
+
+export async function resetPasswordAction(token, password, confirmPassword) {
+  const res = await fetch(`${BACKEND_URL}/api/auth/reset-password/${encodeURIComponent(token)}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ password, confirmPassword }),
+  });
+
   return await res.json();
 }
 
