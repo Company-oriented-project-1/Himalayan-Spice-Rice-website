@@ -69,6 +69,12 @@ router.get('/dashboard/details', adminController.getDashboardDetails);
  *           enum: [ADMIN, CUSTOMER]
  *         description: Filter by user role
  *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [ACTIVE, INACTIVE, BLOCKED, DELETED]
+ *         description: Filter by user account status
+ *       - in: query
  *         name: isVerified
  *         schema:
  *           type: boolean
@@ -111,6 +117,9 @@ router.get('/users', adminController.getAllUsers);
  *               role:
  *                 type: string
  *                 enum: [ADMIN, CUSTOMER]
+ *               status:
+ *                 type: string
+ *                 enum: [ACTIVE, INACTIVE, BLOCKED, DELETED]
  *               isVerified:
  *                 type: boolean
  *     responses:
@@ -311,9 +320,51 @@ router.patch('/users/:id/verify', adminController.setUserVerification);
 
 /**
  * @swagger
+ * /api/admin/users/{id}/status:
+ *   patch:
+ *     summary: Update user status
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: User ID (UUID)
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [status]
+ *             properties:
+ *               status:
+ *                 type: string
+ *                 enum: [ACTIVE, INACTIVE, BLOCKED, DELETED]
+ *     responses:
+ *       200:
+ *         description: User status updated successfully
+ *       400:
+ *         description: Invalid status payload
+ *       401:
+ *         description: Unauthorized, token missing or invalid
+ *       403:
+ *         description: Forbidden, admin access required
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Server error
+ */
+router.patch('/users/:id/status', adminController.updateUserStatus);
+
+/**
+ * @swagger
  * /api/admin/users/{id}:
  *   delete:
- *     summary: Delete a user account
+ *     summary: Mark a user account as DELETED
  *     tags: [Admin]
  *     security:
  *       - bearerAuth: []
@@ -326,7 +377,7 @@ router.patch('/users/:id/verify', adminController.setUserVerification);
  *         description: User ID (UUID)
  *     responses:
  *       200:
- *         description: User deleted successfully
+ *         description: User marked as DELETED successfully
  *       400:
  *         description: Invalid delete request
  *       401:
@@ -339,5 +390,426 @@ router.patch('/users/:id/verify', adminController.setUserVerification);
  *         description: Server error
  */
 router.delete('/users/:id', adminController.deleteUser);
+
+/**
+ * @swagger
+ * /api/admin/categories:
+ *   get:
+ *     summary: Get all categories with filters and pagination
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [ACTIVE, INACTIVE]
+ *   post:
+ *     summary: Create category
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ */
+router.get('/categories', adminController.getAllCategoriesAdmin);
+router.post('/categories', adminController.createCategoryAdmin);
+
+/**
+ * @swagger
+ * /api/admin/categories/options:
+ *   get:
+ *     summary: Get category options for product forms
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Category options fetched successfully
+ *       500:
+ *         description: Server error
+ */
+router.get('/categories/options', adminController.getAdminCategoryOptions);
+
+/**
+ * @swagger
+ * /api/admin/categories/{id}:
+ *   get:
+ *     summary: Get category by ID
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *   put:
+ *     summary: Update category
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ */
+router.get('/categories/:id', adminController.getCategoryByIdAdmin);
+router.put('/categories/:id', adminController.updateCategoryAdmin);
+
+/**
+ * @swagger
+ * /api/admin/categories/{id}/status:
+ *   patch:
+ *     summary: Update category status
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ */
+router.patch('/categories/:id/status', adminController.updateCategoryStatusAdmin);
+
+/**
+ * @swagger
+ * /api/admin/products:
+ *   get:
+ *     summary: Get all products with filters and pagination
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: categoryId
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: isFeatured
+ *         schema:
+ *           type: boolean
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [ACTIVE, INACTIVE, DISCONTINUED]
+ *     responses:
+ *       200:
+ *         description: Products fetched successfully
+ *       500:
+ *         description: Server error
+ *   post:
+ *     summary: Create a new product
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [name, categoryId, price]
+ *             properties:
+ *               name:
+ *                 type: string
+ *               slug:
+ *                 type: string
+ *               productCode:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               price:
+ *                 type: number
+ *               stock:
+ *                 type: integer
+ *               quantity:
+ *                 type: integer
+ *               unit:
+ *                 type: string
+ *               images:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *               isFeatured:
+ *                 type: boolean
+ *               status:
+ *                 type: string
+ *                 enum: [ACTIVE, INACTIVE, DISCONTINUED]
+ *               categoryId:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Product created successfully
+ *       400:
+ *         description: Invalid payload
+ *       500:
+ *         description: Server error
+ */
+router.get('/products', adminController.getAllProductsAdmin);
+router.post('/products', adminController.createProductAdmin);
+router.get('/products/code/:productCode', adminController.getProductByCodeAdmin);
+
+/**
+ * @swagger
+ * /api/admin/products/{id}:
+ *   get:
+ *     summary: Get product by ID
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Product fetched successfully
+ *       404:
+ *         description: Product not found
+ *       500:
+ *         description: Server error
+ *   put:
+ *     summary: Update product
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Product updated successfully
+ *       404:
+ *         description: Product not found
+ *       500:
+ *         description: Server error
+ */
+router.get('/products/:id', adminController.getProductByIdAdmin);
+router.put('/products/:id', adminController.updateProductAdmin);
+
+/**
+ * @swagger
+ * /api/admin/products/{id}/reviews:
+ *   get:
+ *     summary: Get reviews for a specific product
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [ACTIVE, INACTIVE]
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Product reviews fetched successfully
+ *       404:
+ *         description: Product not found
+ *       500:
+ *         description: Server error
+ */
+router.get('/products/:id/reviews', adminController.getProductReviewsAdmin);
+
+/**
+ * @swagger
+ * /api/admin/products/{id}/status:
+ *   patch:
+ *     summary: Update product status
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [status]
+ *             properties:
+ *               status:
+ *                 type: string
+ *                 enum: [ACTIVE, INACTIVE, DISCONTINUED]
+ *     responses:
+ *       200:
+ *         description: Product status updated successfully
+ *       404:
+ *         description: Product not found
+ *       500:
+ *         description: Server error
+ */
+router.patch('/products/:id/status', adminController.updateProductStatusAdmin);
+
+/**
+ * @swagger
+ * /api/admin/reviews/{id}/status:
+ *   patch:
+ *     summary: Update review active status
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [status]
+ *             properties:
+ *               status:
+ *                 type: string
+ *                 enum: [ACTIVE, INACTIVE]
+ *     responses:
+ *       200:
+ *         description: Review status updated successfully
+ *       404:
+ *         description: Review not found
+ *       500:
+ *         description: Server error
+ */
+router.patch('/reviews/:id/status', adminController.updateReviewStatusAdmin);
+
+/**
+ * @swagger
+ * /api/admin/hero-sliders:
+ *   get:
+ *     summary: Get hero sliders with filters and pagination
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *   post:
+ *     summary: Create hero slider
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ */
+router.get('/hero-sliders', adminController.getHeroSlidersAdmin);
+router.post('/hero-sliders', adminController.createHeroSliderAdmin);
+
+/**
+ * @swagger
+ * /api/admin/hero-sliders/{id}:
+ *   get:
+ *     summary: Get hero slider by ID
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *   put:
+ *     summary: Update hero slider
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ */
+router.get('/hero-sliders/:id', adminController.getHeroSliderByIdAdmin);
+router.put('/hero-sliders/:id', adminController.updateHeroSliderAdmin);
+
+/**
+ * @swagger
+ * /api/admin/hero-sliders/{id}/status:
+ *   patch:
+ *     summary: Update hero slider status
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ */
+router.patch('/hero-sliders/:id/status', adminController.updateHeroSliderStatusAdmin);
+
+/**
+ * @swagger
+ * /api/admin/settings:
+ *   get:
+ *     summary: Get site settings singleton
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Site settings fetched successfully
+ *       500:
+ *         description: Server error
+ *   put:
+ *     summary: Update site settings singleton
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               storeName:
+ *                 type: string
+ *               contactEmail:
+ *                 type: string
+ *                 nullable: true
+ *               contactPhone:
+ *                 type: string
+ *                 nullable: true
+ *               deliveryFee:
+ *                 type: number
+ *               minOrderForFreeDelivery:
+ *                 type: number
+ *               isStoreOpen:
+ *                 type: boolean
+ *               maintenanceMode:
+ *                 type: boolean
+ *     responses:
+ *       200:
+ *         description: Site settings updated successfully
+ *       400:
+ *         description: Invalid payload
+ *       500:
+ *         description: Server error
+ */
+router.get('/settings', adminController.getSiteSettingsAdmin);
+router.put('/settings', adminController.updateSiteSettingsAdmin);
 
 module.exports = router;

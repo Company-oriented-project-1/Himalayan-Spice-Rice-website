@@ -16,7 +16,11 @@ export const Button = ({ children, variant = 'primary', className = '', ...props
   };
   
   return (
-    <button className={`${base} ${variants[variant]} ${sizes[props.size || 'md']} ${className}`} {...props}>
+    <button
+      className={`${base} ${variants[variant]} ${sizes[props.size || 'md']} ${className}`}
+      suppressHydrationWarning
+      {...props}
+    >
       {children}
     </button>
   );

@@ -2,7 +2,6 @@ export default function AdminOrdersPage() {
   return (
     <div className="space-y-6">
       <header>
-        <p className="text-xs uppercase tracking-[0.18em] text-red-800">Admin Module</p>
         <h2 className="font-title mt-2 text-3xl font-bold text-stone-900">Orders</h2>
         <p className="mt-2 text-stone-600">Track incoming orders and fulfillment status.</p>
       </header>

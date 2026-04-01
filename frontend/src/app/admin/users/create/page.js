@@ -7,7 +7,6 @@ export default function CreateAdminUserPage() {
     <div className="space-y-6">
       <header className="flex items-center justify-between gap-4">
         <div>
-          <p className="text-xs uppercase tracking-[0.18em] text-red-800">Admin Module</p>
           <h2 className="font-title mt-2 text-3xl font-bold text-stone-900">Create User</h2>
           <p className="mt-2 text-stone-600">Add a new user account with role and verification controls.</p>
         </div>

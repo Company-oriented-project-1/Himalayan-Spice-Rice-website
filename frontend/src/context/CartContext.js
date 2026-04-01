@@ -5,33 +5,27 @@ import { CheckCircle2 } from 'lucide-react';
 export const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
-  const [cart, setCart] = useState(() => {
-    if (typeof window === 'undefined') return [];
-    try {
-      const saved = window.localStorage.getItem('himalayan_cart');
-      return saved ? JSON.parse(saved) : [];
-    } catch (e) {
-      console.error('Failed to parse cart');
-      return [];
-    }
-  });
+  const [cart, setCart] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState(null);
-  const [isLoaded, setIsLoaded] = useState(false); // Tracks if client-side load is done
+  const [hasHydrated, setHasHydrated] = useState(false);
 
-    useEffect(() => {
-    if (typeof window !== 'undefined') {
-      window.localStorage.setItem('himalayan_cart', JSON.stringify(cart));
-    }
-  }, [cart]);
-  
-
-  // 2. Save to LocalStorage whenever cart changes (but only AFTER the initial load)
+  // Load cart on client after mount so SSR/CSR first render remain consistent.
   useEffect(() => {
-    if (isLoaded) {
-      localStorage.setItem('himalayan_cart', JSON.stringify(cart));
+    try {
+      const saved = localStorage.getItem('himalayan_cart');
+      setCart(saved ? JSON.parse(saved) : []);
+    } catch (_error) {
+      setCart([]);
+    } finally {
+      setHasHydrated(true);
     }
-  }, [cart, isLoaded]);
+  }, []);
+
+  useEffect(() => {
+    if (!hasHydrated) return;
+    localStorage.setItem('himalayan_cart', JSON.stringify(cart));
+  }, [cart, hasHydrated]);
 
   const showToast = (message) => {
     setToastMessage(message);
@@ -55,7 +49,7 @@ export const CartProvider = ({ children }) => {
   const updateQuantity = (id, delta) => {
     setCart(prev => prev.map(item => {
       if (item.id === id) {
-        const newQty = Math.max(1, Math.min(item.stock, item.qty + delta));
+        const newQty = Math.max(1, item.qty + delta);
         return { ...item, qty: newQty };
       }
       return item;

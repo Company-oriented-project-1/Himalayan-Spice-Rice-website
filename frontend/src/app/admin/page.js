@@ -1,6 +1,13 @@
-import { getAdminDashboardDetailsAction } from "@/lib/actions";
+import { redirect } from "next/navigation";
 
-export default async function AdminDashboardPage() {
+import AdminDashboardBarcodeLookup from "@/components/admin/AdminDashboardBarcodeLookup";
+import { getAdminDashboardDetailsAction, getAdminProductByCodeAction } from "@/lib/actions";
+
+export default async function AdminDashboardPage({ searchParams }) {
+  const resolvedSearchParams = await searchParams;
+  const scanErrorMessage = resolvedSearchParams?.scanError || "";
+  const barcodeValue = resolvedSearchParams?.barcode || "";
+
   const dashboardResult = await getAdminDashboardDetailsAction();
   const details = dashboardResult?.data || null;
 
@@ -11,11 +18,34 @@ export default async function AdminDashboardPage() {
     pendingOrders: details?.pendingOrders ?? 0
   };
 
+  async function lookupProductByBarcodeAction(formData) {
+    "use server";
+
+    const barcode = String(formData.get("barcode") || "").trim();
+
+    if (!barcode) {
+      redirect("/admin?scanError=Please%20scan%20or%20enter%20a%20barcode");
+    }
+
+    const result = await getAdminProductByCodeAction(barcode);
+
+    if (result?.error) {
+      redirect(`/admin?scanError=${encodeURIComponent(result.error)}&barcode=${encodeURIComponent(barcode)}`);
+    }
+
+    const productId = result?.data?.id;
+    if (!productId) {
+      redirect(`/admin?scanError=${encodeURIComponent("No product found for this barcode")}&barcode=${encodeURIComponent(barcode)}`);
+    }
+
+    redirect(`/admin/products/${productId}`);
+  }
+
   return (
     <div className="space-y-8">
       <header>
-        <p className="text-xs uppercase tracking-[0.18em] text-red-800">Admin Dashboard</p>
-        <h2 className="font-title mt-2 text-3xl font-bold text-stone-900 md:text-4xl">Control Center</h2>
+                  <h2 className="font-title mt-2 text-3xl font-bold text-stone-900">Admin Dashboard</h2>
+
         <p className="mt-2 max-w-2xl text-stone-600">
           Monitor platform activity and manage core modules from one place.
         </p>
@@ -42,6 +72,12 @@ export default async function AdminDashboardPage() {
           <p className="mt-3 text-3xl font-bold text-orange-900">{stats.pendingOrders}</p>
         </article>
       </section>
+
+      <AdminDashboardBarcodeLookup
+        action={lookupProductByBarcodeAction}
+        errorMessage={scanErrorMessage}
+        initialBarcode={barcodeValue}
+      />
 
       <section className="rounded-2xl border border-stone-200 bg-white/90 p-6 shadow-sm">
         <h3 className="font-title text-lg font-semibold text-stone-900">Status</h3>

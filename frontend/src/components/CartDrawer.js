@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable @next/next/no-img-element */
 import React, { useContext } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -133,7 +134,6 @@ export default function CartDrawer() {
                           <button
                             onClick={() => updateQuantity(item.id, 1)}
                             className="p-1 text-stone-500 hover:text-red-800 hover:bg-stone-50 rounded-r-lg transition-colors"
-                            disabled={item.qty >= item.stock}
                           >
                             <Plus size={16} />
                           </button>

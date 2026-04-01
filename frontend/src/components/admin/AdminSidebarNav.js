@@ -23,11 +23,7 @@ export default function AdminSidebarNav({ links }) {
           <Link
             key={link.href}
             href={link.href}
-            className={`block rounded-lg border px-4 py-2.5 text-sm font-medium transition ${
-              active
-                ? "border-red-300 bg-red-100 text-red-900 shadow-sm"
-                : "border-stone-200 bg-stone-50 text-stone-700 hover:border-red-300 hover:bg-red-50 hover:text-red-900"
-            }`}
+            className={active ? "admin-link admin-link-active" : "admin-link"}
             aria-current={active ? "page" : undefined}
           >
             {link.label}

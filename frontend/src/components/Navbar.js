@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect, useContext } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { 
   ShoppingBag, 
@@ -13,8 +14,9 @@ import {
 } from "lucide-react";
 import { useSession, signOut } from "next-auth/react"; // 1. Import NextAuth hooks
 import { CartContext } from "@/context/CartContext";
-import { CATEGORIES } from "@/lib/data";
 import { Button } from "./ui/Button";
+
+const CATEGORY_API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
 
 export default function Navbar() {
   const router = useRouter();
@@ -24,6 +26,7 @@ export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [mounted, setMounted] = useState(false);
+  const [categories, setCategories] = useState([]);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -37,6 +40,38 @@ export default function Navbar() {
     const handleScroll = () => setIsScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadCategories() {
+      try {
+        const response = await fetch(`${CATEGORY_API_BASE}/api/category`, {
+          method: "GET",
+          cache: "no-store"
+        });
+        const data = await response.json();
+
+        if (!response.ok) {
+          return;
+        }
+
+        if (!cancelled) {
+          setCategories(Array.isArray(data?.categories) ? data.categories : []);
+        }
+      } catch (_error) {
+        if (!cancelled) {
+          setCategories([]);
+        }
+      }
+    }
+
+    loadCategories();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const handleNavClick = (path) => {
@@ -76,7 +111,7 @@ export default function Navbar() {
               className="flex-1 lg:flex-none flex justify-center lg:justify-start items-center cursor-pointer group"
               onClick={() => handleNavClick("/")}
             >
-              <img src="/logo.png" alt="Himalayan Spice Rice" className="h-10 w-auto" />
+              <Image src="/logo.png" alt="Himalayan Spice Rice" width={180} height={40} className="h-10 w-auto" priority />
             </div>
 
             {/* Desktop Navigation */}
@@ -96,20 +131,20 @@ export default function Navbar() {
                 </button>
                 <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-stone-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform origin-top translate-y-2 group-hover:translate-y-0">
                   <div className="py-2">
-                    {CATEGORIES.map((cat) => (
+                    {categories.map((cat) => (
                       <button
-                        key={cat.id}
-                        onClick={() => handleNavClick(`/categories/${cat.id}`)}
-                        className="w-full text-left px-4 py-2 text-sm text-stone-600 hover:bg-stone-50 hover:text-red-800 flex items-center gap-2"
+                        key={cat.id || cat.slug}
+                        onClick={() => handleNavClick(`/categories/${cat.slug}`)}
+                        className="w-full text-left px-4 py-2 text-sm text-stone-600 hover:bg-stone-50 hover:text-red-800"
                       >
-                        <span>{cat.icon}</span> {cat.name}
+                        {cat.name}
                       </button>
                     ))}
                     <button
-                      onClick={() => handleNavClick("/categories/all")}
+                      onClick={() => handleNavClick("/categories")}
                       className="w-full text-left px-4 py-2 text-sm font-semibold text-red-800 hover:bg-red-50 border-t border-stone-100 mt-1 pt-2"
                     >
-                      View All Products
+                      View All Categories
                     </button>
                   </div>
                 </div>
@@ -240,9 +275,27 @@ export default function Navbar() {
               onClick={() => handleNavClick("/categories")}
               className="w-full text-left px-4 py-3 rounded-xl font-medium text-stone-700 hover:bg-stone-50 hover:text-red-800"
             >
-              All Categories
+              Browse Categories
             </button>
-            {/* ... rest of your categories list ... */}
+
+            <div className="px-4 pt-1 pb-2">
+              <p className="text-xs uppercase tracking-wide text-stone-500 mb-2">Categories</p>
+              <div className="space-y-1 max-h-64 overflow-y-auto pr-1">
+                {categories.map((cat) => (
+                  <button
+                    key={cat.id || cat.slug}
+                    onClick={() => handleNavClick(`/categories/${cat.slug}`)}
+                    className="w-full text-left px-3 py-2 rounded-lg text-sm text-stone-700 hover:bg-stone-50 hover:text-red-800"
+                  >
+                    {cat.name}
+                  </button>
+                ))}
+
+                {categories.length === 0 && (
+                  <p className="text-xs text-stone-500 px-3 py-1">No categories available.</p>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </div>

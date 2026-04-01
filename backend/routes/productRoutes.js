@@ -1,15 +1,17 @@
 const express = require('express');
 const router = express.Router();
-const { verifyToken, isAdmin } = require('../middleware/authMiddleware');
-const { createProduct, getAllProducts } = require('../controllers/productController');
+const { verifyToken } = require('../middleware/authMiddleware');
+const {
+	getAllProducts,
+	getProductBySlug,
+	getProductReviewsBySlug,
+	createProductReviewBySlug
+} = require('../controllers/productController');
 
 // PUBLIC: Anyone can browse the groceries
 router.get('/', getAllProducts);
-
-// PRIVATE: Anyone logged in can see their own profile or specific data
-// router.get('/me', verifyToken, userController.getProfile);
-
-// ADMIN ONLY: Only admins can add or delete grocery items
-router.post('/add', verifyToken, isAdmin, createProduct);
+router.get('/:slug/reviews', getProductReviewsBySlug);
+router.post('/:slug/reviews', verifyToken, createProductReviewBySlug);
+router.get('/:slug', getProductBySlug);
 
 module.exports = router;

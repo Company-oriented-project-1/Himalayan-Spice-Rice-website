@@ -89,7 +89,6 @@ export default async function EditAdminUserPage({ params, searchParams }) {
     <div className="space-y-6">
       <header className="flex items-center justify-between gap-3">
         <div>
-          <p className="text-xs uppercase tracking-[0.18em] text-red-800">Admin Module</p>
           <h2 className="font-title mt-2 text-3xl font-bold text-stone-900">Edit User</h2>
           <p className="mt-2 text-stone-600">Update user details, role, and verification status.</p>
         </div>

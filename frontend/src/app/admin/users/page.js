@@ -1,15 +1,20 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { deleteAdminUserAction, getAdminUsersAction } from "@/lib/actions";
-import ConfirmDeleteButton from "@/components/admin/ConfirmDeleteButton";
+import { getAdminUsersAction, updateAdminUserStatusAction } from "@/lib/actions";
+import UserStatusSelectForm from "@/components/admin/UserStatusSelectForm";
+
+const VALID_USER_STATUSES = ["ACTIVE", "INACTIVE", "BLOCKED", "DELETED"];
 
 export default async function AdminUsersPage({ searchParams }) {
-  const page = Number(searchParams?.page || "1");
-  const limit = Number(searchParams?.limit || "10");
-  const search = searchParams?.search || "";
-  const role = searchParams?.role || "";
-  const isVerifiedParam = searchParams?.isVerified;
+  const resolvedSearchParams = await searchParams;
+
+  const page = Number(resolvedSearchParams?.page || "1");
+  const limit = Number(resolvedSearchParams?.limit || "10");
+  const search = resolvedSearchParams?.search || "";
+  const role = resolvedSearchParams?.role || "";
+  const status = resolvedSearchParams?.status || "";
+  const isVerifiedParam = resolvedSearchParams?.isVerified;
 
   const isVerified =
     isVerifiedParam === "true" ? true : isVerifiedParam === "false" ? false : undefined;
@@ -19,18 +24,27 @@ export default async function AdminUsersPage({ searchParams }) {
     limit: Number.isNaN(limit) ? 10 : limit,
     search,
     role,
+    status,
     isVerified
   });
 
   const users = usersResult?.data?.users || [];
   const pagination = usersResult?.data?.pagination || { page: 1, totalPages: 1 };
 
-  async function deleteUserFormAction(formData) {
+  const paginationQuery = new URLSearchParams();
+  paginationQuery.set("limit", String(limit));
+  if (search) paginationQuery.set("search", search);
+  if (role) paginationQuery.set("role", role);
+  if (status) paginationQuery.set("status", status);
+  if (typeof isVerified === "boolean") paginationQuery.set("isVerified", String(isVerified));
+
+  async function updateUserStatusFormAction(formData) {
     "use server";
     const userId = String(formData.get("userId") || "");
-    if (!userId) return;
+    const nextStatus = String(formData.get("status") || "");
+    if (!userId || !VALID_USER_STATUSES.includes(nextStatus)) return;
 
-    await deleteAdminUserAction(userId);
+    await updateAdminUserStatusAction(userId, nextStatus);
     redirect("/admin/users");
   }
 
@@ -38,7 +52,6 @@ export default async function AdminUsersPage({ searchParams }) {
     <div className="space-y-6">
       <header className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
-          <p className="text-xs uppercase tracking-[0.18em] text-red-800">Admin Module</p>
           <h2 className="font-title mt-2 text-3xl font-bold text-stone-900">Users</h2>
           <p className="mt-2 text-stone-600">Search, view, edit, and remove users.</p>
         </div>
@@ -51,7 +64,7 @@ export default async function AdminUsersPage({ searchParams }) {
       </header>
 
       <section className="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm">
-        <form className="grid grid-cols-1 gap-3 md:grid-cols-4" method="GET">
+        <form className="grid grid-cols-1 gap-3 md:grid-cols-5" method="GET">
           <input
             type="text"
             name="search"
@@ -77,6 +90,17 @@ export default async function AdminUsersPage({ searchParams }) {
             <option value="true">Verified</option>
             <option value="false">Unverified</option>
           </select>
+          <select
+            name="status"
+            defaultValue={status}
+            className="rounded-lg border border-stone-300 px-3 py-2 text-sm outline-none ring-red-200 focus:ring"
+          >
+            <option value="">All Statuses</option>
+            <option value="ACTIVE">ACTIVE</option>
+            <option value="INACTIVE">INACTIVE</option>
+            <option value="BLOCKED">BLOCKED</option>
+            <option value="DELETED">DELETED</option>
+          </select>
           <button
             type="submit"
             className="rounded-lg border border-stone-300 bg-stone-100 px-4 py-2 text-sm font-medium text-stone-800 hover:bg-stone-200"
@@ -100,6 +124,7 @@ export default async function AdminUsersPage({ searchParams }) {
                 <th className="px-4 py-3 font-semibold">Name</th>
                 <th className="px-4 py-3 font-semibold">Email</th>
                 <th className="px-4 py-3 font-semibold">Role</th>
+                <th className="px-4 py-3 font-semibold">Status</th>
                 <th className="px-4 py-3 font-semibold">Verified</th>
                 <th className="px-4 py-3 font-semibold">Actions</th>
               </tr>
@@ -107,7 +132,7 @@ export default async function AdminUsersPage({ searchParams }) {
             <tbody>
               {users.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="px-4 py-8 text-center text-stone-500">
+                  <td colSpan={6} className="px-4 py-8 text-center text-stone-500">
                     No users found.
                   </td>
                 </tr>
@@ -120,6 +145,21 @@ export default async function AdminUsersPage({ searchParams }) {
                   <td className="px-4 py-3">
                     <span className="rounded-full bg-amber-100 px-2 py-1 text-xs font-semibold text-amber-900">
                       {user.role}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3">
+                    <span
+                      className={`rounded-full px-2 py-1 text-xs font-semibold ${
+                        user.status === "ACTIVE"
+                          ? "bg-emerald-100 text-emerald-800"
+                          : user.status === "INACTIVE"
+                            ? "bg-stone-200 text-stone-700"
+                            : user.status === "BLOCKED"
+                              ? "bg-orange-100 text-orange-800"
+                              : "bg-red-100 text-red-800"
+                      }`}
+                    >
+                      {user.status || "ACTIVE"}
                     </span>
                   </td>
                   <td className="px-4 py-3">
@@ -147,14 +187,11 @@ export default async function AdminUsersPage({ searchParams }) {
                       >
                         Edit
                       </Link>
-                      <form action={deleteUserFormAction}>
-                        <input type="hidden" name="userId" value={user.id} />
-                        <ConfirmDeleteButton
-                          userName={user.name || user.email}
-                          label="Delete"
-                          className="rounded-md border border-red-300 px-2.5 py-1 text-xs font-medium text-red-700 hover:bg-red-50"
-                        />
-                      </form>
+                      <UserStatusSelectForm
+                        userId={user.id}
+                        currentStatus={user.status || "ACTIVE"}
+                        action={updateUserStatusFormAction}
+                      />
                     </div>
                   </td>
                 </tr>
@@ -170,13 +207,13 @@ export default async function AdminUsersPage({ searchParams }) {
         </p>
         <div className="flex gap-2">
           <Link
-            href={`/admin/users?page=${Math.max(1, Number(pagination.page || 1) - 1)}&limit=${limit}`}
+            href={`/admin/users?page=${Math.max(1, Number(pagination.page || 1) - 1)}&${paginationQuery.toString()}`}
             className="rounded-lg border border-stone-300 bg-stone-100 px-3 py-1.5 text-sm font-medium text-stone-700 hover:bg-stone-200"
           >
             Previous
           </Link>
           <Link
-            href={`/admin/users?page=${Math.min(Number(pagination.totalPages || 1), Number(pagination.page || 1) + 1)}&limit=${limit}`}
+            href={`/admin/users?page=${Math.min(Number(pagination.totalPages || 1), Number(pagination.page || 1) + 1)}&${paginationQuery.toString()}`}
             className="rounded-lg border border-stone-300 bg-stone-100 px-3 py-1.5 text-sm font-medium text-stone-700 hover:bg-stone-200"
           >
             Next

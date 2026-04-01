@@ -2,12 +2,11 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import {
-  deleteAdminUserAction,
   getAdminUserByIdAction,
   setAdminUserVerificationAction,
+  updateAdminUserStatusAction,
   updateAdminUserRoleAction
 } from "@/lib/actions";
-import ConfirmDeleteButton from "@/components/admin/ConfirmDeleteButton";
 
 export default async function AdminUserDetailsPage({ params, searchParams }) {
   const resolvedParams = await params;
@@ -71,22 +70,26 @@ export default async function AdminUserDetailsPage({ params, searchParams }) {
     redirect(`/admin/users/${userId}`);
   }
 
-  async function deleteUserAction() {
+  async function updateStatusAction(formData) {
     "use server";
-    const response = await deleteAdminUserAction(userId);
+    const status = String(formData.get("status") || "");
+    if (!["ACTIVE", "INACTIVE", "BLOCKED", "DELETED"].includes(status)) {
+      redirect(`/admin/users/${userId}?error=Invalid%20status`);
+    }
+
+    const response = await updateAdminUserStatusAction(userId, status);
 
     if (response.error) {
       redirect(`/admin/users/${userId}?error=${encodeURIComponent(response.error)}`);
     }
 
-    redirect("/admin/users");
+    redirect(`/admin/users/${userId}`);
   }
 
   return (
     <div className="space-y-6">
       <header className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <p className="text-xs uppercase tracking-[0.18em] text-red-800">Admin Module</p>
           <h2 className="font-title mt-2 text-3xl font-bold text-stone-900">User Details</h2>
         </div>
         <div className="flex gap-2">
@@ -118,6 +121,7 @@ export default async function AdminUserDetailsPage({ params, searchParams }) {
             <div><dt className="font-semibold">Name</dt><dd>{user.name || "-"}</dd></div>
             <div><dt className="font-semibold">Email</dt><dd>{user.email}</dd></div>
             <div><dt className="font-semibold">Role</dt><dd>{user.role}</dd></div>
+            <div><dt className="font-semibold">Status</dt><dd>{user.status || "ACTIVE"}</dd></div>
             <div><dt className="font-semibold">Verified</dt><dd>{user.isVerified ? "Yes" : "No"}</dd></div>
           </dl>
         </article>
@@ -159,12 +163,23 @@ export default async function AdminUserDetailsPage({ params, searchParams }) {
             </div>
           </form>
 
-          <form action={deleteUserAction} className="mt-6">
-            <ConfirmDeleteButton
-              userName={user.name || user.email}
-              label="Delete User"
-              className="rounded-lg border border-red-300 bg-red-50 px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-100"
-            />
+          <form action={updateStatusAction} className="mt-4 space-y-2">
+            <label className="block text-sm font-medium text-stone-700">Update Status</label>
+            <div className="flex gap-2">
+              <select
+                name="status"
+                defaultValue={user.status || "ACTIVE"}
+                className="flex-1 rounded-lg border border-stone-300 px-3 py-2 text-sm"
+              >
+                <option value="ACTIVE">ACTIVE</option>
+                <option value="INACTIVE">INACTIVE</option>
+                <option value="BLOCKED">BLOCKED</option>
+                <option value="DELETED">DELETED</option>
+              </select>
+              <button type="submit" className="rounded-lg border border-red-300 bg-red-50 px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-100">
+                Save
+              </button>
+            </div>
           </form>
         </article>
       </section>

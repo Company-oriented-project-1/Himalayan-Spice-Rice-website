@@ -22,6 +22,7 @@ model User {
   resetToken               String?
   resetTokenExpiry         DateTime?
   passwordResetEmailSentAt DateTime?
+  status                   UserStatus @default(ACTIVE) 
   createdAt                DateTime  @default(now())
   updatedAt                DateTime  @updatedAt
 
@@ -57,22 +58,29 @@ model Category {
   description String?
   products    Product[]
   createdAt   DateTime  @default(now())
+  isActive    Boolean   @default(true)
+  isFeatured  Boolean  @default(false)
+  updatedAt   DateTime  @updatedAt
 }
 
 model Product {
   id          String   @id @default(uuid())
   name        String
   slug        String   @unique // For SEO: /product/basmati-rice-5kg
+  productCode String?  @unique // Barcode/UPC/EAN code
   description String?
-  price       Decimal  @db.Decimal(10, 2)
-  stock       Int      @default(0)
+  price       Decimal  @db.Decimal(10, 2) // This acts as the "Original Price"
+  salePrice   Decimal? @db.Decimal(10, 2) // The "Discounted Price"
+  discountType DiscountType? @default(NONE)
+  stock       Int      @default(1)
+  quantity    Int      @default(1)
   unit        String   @default("kg") // e.g., kg, gram, packet
   images      String[] // Array of image URLs
   isFeatured  Boolean  @default(false)
 
   categoryId String
   category   Category @relation(fields: [categoryId], references: [id])
-
+  status      ProductStatus @default(ACTIVE)
   reviews    ProductReview[]
   orderItems OrderItem[]
   cartItems  CartItem[]
@@ -176,6 +184,7 @@ model ProductReview {
   productId String
   product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
+  isActive  Boolean  @default(true)
 
   @@unique([userId, productId])
   @@index([productId, createdAt])
@@ -186,6 +195,25 @@ model ProductReview {
 enum Role {
   CUSTOMER
   ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  BLOCKED
+  DELETED
+}
+
+enum ProductStatus {
+  ACTIVE
+  INACTIVE
+  DISCONTINUED
+}
+
+enum DiscountType {
+  NONE
+  PERCENTAGE
+  FLAT
 }
 
 enum OrderStatus {
