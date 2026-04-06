@@ -111,7 +111,7 @@ export default function Navbar() {
               className="flex-1 lg:flex-none flex justify-center lg:justify-start items-center cursor-pointer group"
               onClick={() => handleNavClick("/")}
             >
-              <Image src="/logo.png" alt="Himalayan Spice Rice" width={180} height={40} className="h-10 w-auto" priority />
+              <Image src="/logo.png" alt="Himalayan Spice Rice" width={180} height={40} className="h-12 w-auto" priority />
             </div>
 
             {/* Desktop Navigation */}

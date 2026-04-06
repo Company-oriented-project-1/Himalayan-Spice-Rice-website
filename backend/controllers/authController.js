@@ -228,7 +228,21 @@ exports.getProfile = async (req, res) => {
         role: true,
         isVerified: true,
         createdAt: true,
-        // Do NOT select the password field
+        profile: {
+          select: {
+            phone: true,
+            address: true,
+            city: true,
+            state: true,
+            postalCode: true,
+            country: true
+          }
+        },
+        _count: {
+          select: {
+            orders: true
+          }
+        }
       }
     });
 
@@ -240,6 +254,74 @@ exports.getProfile = async (req, res) => {
   } catch (err) {
     console.error("Profile Fetch Error:", err);
     res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+exports.updateProfile = async (req, res) => {
+  try {
+    const name = String(req.body?.name || '').trim();
+    const phone = String(req.body?.phone || '').trim();
+    const address = String(req.body?.address || '').trim();
+
+    if (!name || name.length < 2) {
+      return res.status(400).json({ message: 'Name must be at least 2 characters long' });
+    }
+
+    if (phone && !/^\+?[0-9()\-\s]{8,20}$/.test(phone)) {
+      return res.status(400).json({ message: 'Phone number must match Finnish/European format' });
+    }
+
+    await prisma.$transaction(async (tx) => {
+      await tx.user.update({
+        where: { id: req.user.id },
+        data: { name }
+      });
+
+      await tx.userProfile.upsert({
+        where: { userId: req.user.id },
+        create: {
+          userId: req.user.id,
+          phone: phone || null,
+          address: address || null
+        },
+        update: {
+          phone: phone || null,
+          address: address || null
+        }
+      });
+    });
+
+    const updatedUser = await prisma.user.findUnique({
+      where: { id: req.user.id },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        isVerified: true,
+        createdAt: true,
+        profile: {
+          select: {
+            phone: true,
+            address: true,
+            city: true,
+            state: true,
+            postalCode: true,
+            country: true
+          }
+        },
+        _count: {
+          select: {
+            orders: true
+          }
+        }
+      }
+    });
+
+    return res.status(200).json({ message: 'Profile updated successfully', user: updatedUser });
+  } catch (err) {
+    console.error('Profile Update Error:', err);
+    return res.status(500).json({ message: 'Failed to update profile' });
   }
 };
 

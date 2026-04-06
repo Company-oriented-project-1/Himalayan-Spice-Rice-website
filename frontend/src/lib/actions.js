@@ -268,7 +268,8 @@ export async function getAdminProductsAction({
   search = "",
   categoryId = "",
   status = "",
-  isFeatured
+  isFeatured,
+  sortBy = ""
 } = {}) {
   const query = new URLSearchParams();
   query.set("page", String(page));
@@ -278,6 +279,7 @@ export async function getAdminProductsAction({
   if (categoryId) query.set("categoryId", categoryId);
   if (status) query.set("status", status);
   if (typeof isFeatured === "boolean") query.set("isFeatured", String(isFeatured));
+  if (sortBy) query.set("sortBy", sortBy);
 
   return fetchAdminApi(`/api/admin/products?${query.toString()}`, { method: "GET" });
 }
@@ -308,6 +310,35 @@ export async function updateAdminProductAction(productId, payload) {
 
 export async function updateAdminProductStatusAction(productId, status) {
   return fetchAdminApi(`/api/admin/products/${productId}/status`, {
+    method: "PATCH",
+    body: JSON.stringify({ status })
+  });
+}
+
+export async function getAdminOrdersAction({
+  page = 1,
+  limit = 10,
+  search = "",
+  status = "",
+  orderType = ""
+} = {}) {
+  const query = new URLSearchParams();
+  query.set("page", String(page));
+  query.set("limit", String(limit));
+
+  if (search) query.set("search", search);
+  if (status) query.set("status", status);
+  if (orderType) query.set("orderType", orderType);
+
+  return fetchAdminApi(`/api/orders/admin?${query.toString()}`, { method: "GET" });
+}
+
+export async function getAdminOrderByIdAction(orderId) {
+  return fetchAdminApi(`/api/orders/admin/${orderId}`, { method: "GET" });
+}
+
+export async function updateAdminOrderStatusAction(orderId, status) {
+  return fetchAdminApi(`/api/orders/admin/${orderId}/status`, {
     method: "PATCH",
     body: JSON.stringify({ status })
   });
@@ -410,6 +441,38 @@ export async function getProfileAction() {
 
     return { data };
   } catch (error) {
+    return { error: "Network error" };
+  }
+}
+
+export async function getMyOrdersAction(limit = 8) {
+  const session = await getServerSession(authOptions);
+
+  if (!session || !session.accessToken) {
+    return { error: "Not authenticated" };
+  }
+
+  try {
+    const query = new URLSearchParams();
+    query.set("limit", String(limit));
+
+    const res = await fetch(`${BACKEND_URL}/api/orders/mine?${query.toString()}`, {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${session.accessToken}`,
+        "Content-Type": "application/json",
+      },
+      cache: "no-store"
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      return { error: data.message || "Failed to fetch order history" };
+    }
+
+    return { data: data.orders || [] };
+  } catch (_error) {
     return { error: "Network error" };
   }
 }

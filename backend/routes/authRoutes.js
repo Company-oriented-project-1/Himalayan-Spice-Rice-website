@@ -186,6 +186,7 @@ router.post('/reset-password/:token', authController.resetPassword);
  *         description: Unauthorized, token missing or invalid
  */
 router.get('/profile', verifyToken, authController.getProfile);
+router.put('/profile', verifyToken, authController.updateProfile);
 
 
 module.exports = router;

@@ -166,6 +166,17 @@ export default function CartDrawer() {
               </p>
               <div className="grid grid-cols-1 gap-3">
                 <Button
+                  variant="outline"
+                  size="lg"
+                  className="w-full text-base"
+                  onClick={() => {
+                    setIsCartOpen(false);
+                    router.push("/cart");
+                  }}
+                >
+                  Go to Cart Page
+                </Button>
+                <Button
                   variant="primary"
                   size="lg"
                   className="w-full text-base"
@@ -174,7 +185,7 @@ export default function CartDrawer() {
                     router.push("/checkout");
                   }}
                 >
-                  Proceed to Pickup Request
+                  Proceed Checkout
                 </Button>
                 <button
                   onClick={() => setIsCartOpen(false)}

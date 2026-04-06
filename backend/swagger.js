@@ -19,8 +19,14 @@ const options = {
       securitySchemes: {
         bearerAuth: {
           type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT',
+          description: 'Paste JWT token from /api/auth/login as: Bearer <token>',
+        },
+        basicAuth: {
+          type: 'http',
           scheme: 'basic',
-          description: 'Use email as username and account password as password',
+          description: 'Alternative auth for supported routes: email as username and account password as password',
         },
       },
     },

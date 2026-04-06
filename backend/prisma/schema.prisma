@@ -217,11 +217,14 @@ enum DiscountType {
 }
 
 enum OrderStatus {
-  PENDING
-  PROCESSING
-  SHIPPED
-  DELIVERED
-  CANCELLED
+  PENDING           // Order placed, payment not yet confirmed
+  PROCESSING        // Kitchen/Warehouse is preparing the items
+  READY_FOR_PICKUP  // Specific for local pickup orders
+  SHIPPED           // Out for delivery (via courier)
+  DELIVERED         // Received by customer
+  COMPLETED         // Received by customer Pickup
+  CANCELLED         // Order voided
+  REFUNDED          // Payment returned
 }
 
 enum OrderType {

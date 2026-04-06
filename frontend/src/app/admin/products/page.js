@@ -20,6 +20,7 @@ export default async function AdminProductsPage({ searchParams }) {
   const status = resolvedSearchParams?.status || "";
   const categoryId = resolvedSearchParams?.categoryId || "";
   const isFeaturedParam = resolvedSearchParams?.isFeatured;
+  const sortBy = resolvedSearchParams?.sortBy || "";
 
   const isFeatured =
     isFeaturedParam === "true" ? true : isFeaturedParam === "false" ? false : undefined;
@@ -31,7 +32,8 @@ export default async function AdminProductsPage({ searchParams }) {
       search,
       categoryId,
       status,
-      isFeatured
+      isFeatured,
+      sortBy
     }),
     getAdminCategoryOptionsAction()
   ]);
@@ -46,6 +48,7 @@ export default async function AdminProductsPage({ searchParams }) {
   if (status) paginationQuery.set("status", status);
   if (categoryId) paginationQuery.set("categoryId", categoryId);
   if (typeof isFeatured === "boolean") paginationQuery.set("isFeatured", String(isFeatured));
+  if (sortBy) paginationQuery.set("sortBy", sortBy);
 
   async function updateProductStatusFormAction(formData) {
     "use server";
@@ -73,7 +76,7 @@ export default async function AdminProductsPage({ searchParams }) {
       </header>
 
       <section className="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm">
-        <form className="grid grid-cols-1 gap-3 md:grid-cols-5" method="GET">
+        <form className="grid grid-cols-1 gap-3 md:grid-cols-6" method="GET">
           <input
             type="text"
             name="search"
@@ -111,6 +114,17 @@ export default async function AdminProductsPage({ searchParams }) {
             <option value="">All Featured States</option>
             <option value="true">Featured</option>
             <option value="false">Not Featured</option>
+          </select>
+          <select
+            name="sortBy"
+            defaultValue={sortBy}
+            className="rounded-lg border border-stone-300 px-3 py-2 text-sm"
+          >
+            <option value="">Newest First</option>
+            <option value="stock">Stock</option>
+            <option value="discounted_first">Discounted First</option>
+            <option value="price">Price</option>
+            <option value="max_discount_first">Max Discount First</option>
           </select>
           <button
             type="submit"
@@ -166,7 +180,14 @@ export default async function AdminProductsPage({ searchParams }) {
                       </div>
                     )}
                   </td>
-                  <td className="px-4 py-3 font-medium text-stone-900">{product.name}</td>
+                  <td className="px-4 py-3 font-medium text-stone-900">
+                    <Link
+                      href={`/admin/products/${product.id}/edit`}
+                      className="text-stone-900 hover:text-blue-700 hover:underline"
+                    >
+                      {product.name}
+                    </Link>
+                  </td>
                   <td className="px-4 py-3 text-stone-700">{product.category?.name || "-"}</td>
                   <td className="px-4 py-3 text-stone-700">
                     {product.salePrice != null ? (

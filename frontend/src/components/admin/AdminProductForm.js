@@ -110,7 +110,7 @@ export default function AdminProductForm({
           <input
             type="number"
             name="stock"
-            defaultValue={initialValues.stock ?? 0}
+            defaultValue={initialValues.stock ?? 100}
             required
             min="0"
             step="1"
