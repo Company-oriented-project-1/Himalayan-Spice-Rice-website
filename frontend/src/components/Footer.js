@@ -1,6 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
-import { Leaf, MapPin, Phone, Clock } from 'lucide-react';
+import Image from 'next/image';
+import { MapPin, Phone, Clock, Mail } from 'lucide-react';
 
 export default function Footer() {
   return (
@@ -11,28 +12,17 @@ export default function Footer() {
         
         {/* Logo + Description */}
         <div>
-          <div className="flex items-center mb-4">
-            {/* Mountain SVG */}
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-8 w-8 text-red-500 mr-2"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-        >
-          <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M3 17l6-9 4 6 4-5 6 8H3z"
-          />
-         </svg>
-            
-            <span className="font-bold text-xl text-white tracking-tight">
-              Himalayan<span className="text-red-500">Spice&Rice</span>
-            </span>
+          <div className="flex justify-center mb-4">
+            <Image
+              src="/logo_full.png"
+              alt="Himalayan Spice and Rice"
+              width={280}
+              height={80}
+              className="h-16 w-auto"
+              priority={false}
+            />
           </div>
-          <p className="mb-6 max-w-sm">
+          <p className="mb-6 max-w-sm mx-auto text-center">
             Bringing the authentic flavors of the Himalayas and Asia straight to your kitchen. Premium quality, fresh ingredients.
           </p>
         </div>
@@ -95,8 +85,8 @@ export default function Footer() {
             </li>
 
             {/* Email */}
-            <li className="flex items-start gap-3">
-              <span className="text-red-500">Email:</span>
+            <li className="flex items-center gap-3">
+              <Mail size={20} className="text-red-500 shrink-0" aria-hidden="true" />
               <span>business2himalayanspice@gmail.com</span>
            </li>
 

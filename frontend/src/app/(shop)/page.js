@@ -43,6 +43,7 @@ const mapProduct = (product) => {
 
 export default function HomePage() {
   const router = useRouter();
+  const categoriesScrollRef = React.useRef(null);
 
   const [homeData, setHomeData] = React.useState(null);
   const [isLoading, setIsLoading] = React.useState(true);
@@ -104,6 +105,12 @@ export default function HomePage() {
 
   const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
   const prevSlide = () => setCurrentSlide((prev) => (prev - 1 + heroSlides.length) % heroSlides.length);
+  const scrollCategoriesLeft = () => {
+    categoriesScrollRef.current?.scrollBy({ left: -320, behavior: "smooth" });
+  };
+  const scrollCategoriesRight = () => {
+    categoriesScrollRef.current?.scrollBy({ left: 320, behavior: "smooth" });
+  };
 
   return (
     <div className="animate-in fade-in duration-500">
@@ -217,33 +224,60 @@ export default function HomePage() {
                 </Button>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-5">
+              <div className="relative">
                 {popularCategories.length === 0 && (
                   <p className="col-span-full rounded-xl border border-stone-200 bg-white p-4 text-sm text-stone-600">
                     No featured categories yet.
                   </p>
                 )}
 
-                {popularCategories.map((category) => (
-                  <div
-                    key={category.id}
-                    onClick={() => router.push("/categories")}
-                    className="group relative cursor-pointer overflow-hidden rounded-2xl border border-stone-100 bg-white p-4 text-center shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl sm:p-6"
-                  >
-                    <div className="absolute left-0 top-0 h-1 w-full origin-left scale-x-0 bg-gradient-to-r from-red-800 to-amber-500 transition-transform duration-300 group-hover:scale-x-100" />
-                    <div className="mx-auto mb-4 h-16 w-16 overflow-hidden rounded-full sm:h-20 sm:w-20">
-                      <img
-                        src={category.image || "https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&q=80&w=400"}
-                        alt={category.name}
-                        className="h-full w-full object-cover"
-                      />
+                {popularCategories.length > 0 && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={scrollCategoriesLeft}
+                      className="absolute -left-2 top-1/2 z-10 hidden -translate-y-1/2 rounded-full border border-stone-200 bg-white p-2 text-stone-700 shadow-md transition hover:bg-stone-50 lg:flex"
+                      aria-label="Scroll categories left"
+                    >
+                      <ChevronRight size={18} className="rotate-180" />
+                    </button>
+
+                    <div
+                      ref={categoriesScrollRef}
+                      className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 sm:gap-6"
+                    >
+                      {popularCategories.map((category) => (
+                        <div
+                          key={category.id}
+                          onClick={() => router.push("/categories")}
+                          className="group relative w-[170px] min-w-[170px] snap-start cursor-pointer overflow-hidden rounded-2xl border border-stone-100 bg-white p-4 text-center shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl sm:w-[190px] sm:min-w-[190px] sm:p-6"
+                        >
+                          <div className="absolute left-0 top-0 h-1 w-full origin-left scale-x-0 bg-gradient-to-r from-red-800 to-amber-500 transition-transform duration-300 group-hover:scale-x-100" />
+                          <div className="mx-auto mb-4 h-16 w-16 overflow-hidden rounded-full sm:h-20 sm:w-20">
+                            <img
+                              src={category.image || "https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&q=80&w=400"}
+                              alt={category.name}
+                              className="h-full w-full object-cover"
+                            />
+                          </div>
+                          <h3 className="font-bold text-stone-800 transition-colors group-hover:text-red-800">
+                            {category.name}
+                          </h3>
+                          <p className="mt-1 text-xs text-stone-500">{category._count?.products || 0} products</p>
+                        </div>
+                      ))}
                     </div>
-                    <h3 className="font-bold text-stone-800 transition-colors group-hover:text-red-800">
-                      {category.name}
-                    </h3>
-                    <p className="mt-1 text-xs text-stone-500">{category._count?.products || 0} products</p>
-                  </div>
-                ))}
+
+                    <button
+                      type="button"
+                      onClick={scrollCategoriesRight}
+                      className="absolute -right-2 top-1/2 z-10 hidden -translate-y-1/2 rounded-full border border-stone-200 bg-white p-2 text-stone-700 shadow-md transition hover:bg-stone-50 lg:flex"
+                      aria-label="Scroll categories right"
+                    >
+                      <ChevronRight size={18} />
+                    </button>
+                  </>
+                )}
               </div>
             </div>
           </section>
@@ -287,8 +321,8 @@ export default function HomePage() {
               },
               {
                 icon: <MapPin size={32} className="text-emerald-400" />,
-                title: "Easy Pickup Ordering",
-                desc: "Reserve online and pick up in-store whenever it suits your schedule."
+                title: "Free Delivery Across Uusimaa",
+                desc: "Enjoy fast, free delivery across the Uusimaa region on your everyday grocery orders."
               }
             ].map((feature) => (
               <div
