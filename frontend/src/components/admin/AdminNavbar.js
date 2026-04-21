@@ -9,12 +9,8 @@ import AdminSignOutButton from "@/components/admin/AdminSignOutButton";
 const THEME_STORAGE_KEY = "admin-theme";
 
 export default function AdminNavbar({ user }) {
-  const [theme, setTheme] = useState(() => {
-    if (typeof window === "undefined") return "light";
-
-    const savedTheme = window.localStorage.getItem(THEME_STORAGE_KEY);
-    return savedTheme === "dark" ? "dark" : "light";
-  });
+  const [theme, setTheme] = useState("light");
+  const [mounted, setMounted] = useState(false);
 
   const avatarLetter = useMemo(() => {
     const seed = user?.name || user?.email || "A";
@@ -24,13 +20,22 @@ export default function AdminNavbar({ user }) {
   useEffect(() => {
     if (typeof window === "undefined") return;
 
+    const savedTheme = window.localStorage.getItem(THEME_STORAGE_KEY);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setTheme(savedTheme === "dark" ? "dark" : "light");
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted || typeof window === "undefined") return;
+
     const root = document.getElementById("admin-theme-root");
     if (!root) return;
 
     root.classList.toggle("admin-dark", theme === "dark");
     root.classList.toggle("admin-light", theme !== "dark");
     window.localStorage.setItem(THEME_STORAGE_KEY, theme);
-  }, [theme]);
+  }, [theme, mounted]);
 
   return (
     <header className="admin-navbar sticky top-0 z-20 px-5 py-3 md:px-8">

@@ -100,7 +100,6 @@ async function sendOrderConfirmationEmail(to, orderDetails) {
         <tr>
           <td style="padding: 6px 0;">${item.name}</td>
           <td style="padding: 6px 0; text-align: center;">${item.quantity}</td>
-          <td style="padding: 6px 0; text-align: right;">EUR ${unitPrice}</td>
           <td style="padding: 6px 0; text-align: right; font-weight: 600;">EUR ${lineTotal}</td>
         </tr>
       `;
@@ -129,7 +128,6 @@ async function sendOrderConfirmationEmail(to, orderDetails) {
             <tr style="text-align: left; color: #6b7280; font-size: 12px;">
               <th style="padding: 8px 0;">Item</th>
               <th style="padding: 8px 0; text-align: center;">Qty</th>
-              <th style="padding: 8px 0; text-align: right;">Unit</th>
               <th style="padding: 8px 0; text-align: right;">Total</th>
             </tr>
           </thead>

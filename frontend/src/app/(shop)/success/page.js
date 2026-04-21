@@ -98,7 +98,6 @@ export default function SuccessPage() {
               <div className="grid grid-cols-12 bg-stone-50 text-xs font-semibold text-stone-500 uppercase tracking-wide px-4 py-3">
                 <div className="col-span-5">Product</div>
                 <div className="col-span-2 text-center">Qty</div>
-                <div className="col-span-2 text-right">Unit</div>
                 <div className="col-span-3 text-right">Subtotal</div>
               </div>
               <div className="divide-y divide-stone-100">
@@ -112,7 +111,6 @@ export default function SuccessPage() {
                     <div key={item.id} className="grid grid-cols-12 px-4 py-3 text-sm">
                       <div className="col-span-5 text-stone-800 font-medium pr-2">{itemName}</div>
                       <div className="col-span-2 text-center text-stone-600">{qty}</div>
-                      <div className="col-span-2 text-right text-stone-600">{formatPrice(unitPrice)}</div>
                       <div className="col-span-3 text-right font-semibold text-stone-900">{formatPrice(lineTotal)}</div>
                     </div>
                   );

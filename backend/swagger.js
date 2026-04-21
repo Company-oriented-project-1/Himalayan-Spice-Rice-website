@@ -26,7 +26,7 @@ const options = {
         basicAuth: {
           type: 'http',
           scheme: 'basic',
-          description: 'Alternative auth for supported routes: email as username and account password as password',
+          description: 'Use email as username and password as password for protected routes that support Basic auth.',
         },
       },
     },
