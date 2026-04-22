@@ -288,15 +288,7 @@ export default function ProductDetailPage() {
                 <ShoppingBag size={20} className="mr-2" /> Add to Cart - {formatPrice(effectivePrice * qty)}
               </Button>
 
-              <div className="flex items-start gap-3 bg-blue-50/50 p-4 rounded-xl border border-blue-100">
-                <MapPin size={24} className="text-blue-600 flex-shrink-0 mt-0.5" />
-                <div>
-                  <h4 className="font-bold text-blue-900 text-sm">Pickup Request Model</h4>
-                  <p className="text-sm text-blue-800/80 mt-1">
-                    Add items to cart to reserve them. Payment will be completed securely at our physical store during pickup.
-                  </p>
-                </div>
-              </div>
+             
             </div>
 
             <div>

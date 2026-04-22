@@ -79,15 +79,7 @@ export default async function AdminDashboardPage({ searchParams }) {
         initialBarcode={barcodeValue}
       />
 
-      <section className="rounded-2xl border border-stone-200 bg-white/90 p-6 shadow-sm">
-        <h3 className="font-title text-lg font-semibold text-stone-900">Status</h3>
-        <p className="mt-2 text-sm text-stone-600">
-          Dashboard is connected to backend admin stats. Product and order metrics stay at zero until those schemas and APIs are added.
-        </p>
-        {dashboardResult?.error && (
-          <p className="mt-3 text-sm font-medium text-red-700">{dashboardResult.error}</p>
-        )}
-      </section>
+ 
     </div>
   );
 }

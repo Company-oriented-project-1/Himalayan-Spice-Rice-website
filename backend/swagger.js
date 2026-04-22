@@ -17,12 +17,12 @@ const options = {
     ],
     components: {
       securitySchemes: {
-        bearerAuth: {
-          type: 'http',
-          scheme: 'bearer',
-          bearerFormat: 'JWT',
-          description: 'Paste JWT token from /api/auth/login as: Bearer <token>',
-        },
+        // bearerAuth: {
+        //   type: 'http',
+        //   scheme: 'bearer',
+        //   bearerFormat: 'JWT',
+        //   description: 'Paste JWT token from /api/auth/login as: Bearer <token>',
+        // },
         basicAuth: {
           type: 'http',
           scheme: 'basic',

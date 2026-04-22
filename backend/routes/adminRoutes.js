@@ -22,7 +22,7 @@ router.use(verifyToken, isAdmin);
  *     description: Returns total users now, and placeholder values for products/orders until related schemas are available.
  *     tags: [Admin]
  *     security:
- *       - bearerAuth: []
+ *       - basicAuth: []
  *     responses:
  *       200:
  *         description: Dashboard details fetched successfully
@@ -42,7 +42,7 @@ router.get('/dashboard/details', adminController.getDashboardDetails);
  *     summary: Get all users with filters and pagination
  *     tags: [Admin]
  *     security:
- *       - bearerAuth: []
+ *       - basicAuth: []
  *     parameters:
  *       - in: query
  *         name: page
@@ -98,7 +98,7 @@ router.get('/users', adminController.getAllUsers);
  *     summary: Create a new user
  *     tags: [Admin]
  *     security:
- *       - bearerAuth: []
+ *       - basicAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -143,7 +143,7 @@ router.post('/users', adminController.createUser);
  *     summary: Get user statistics summary
  *     tags: [Admin]
  *     security:
- *       - bearerAuth: []
+ *       - basicAuth: []
  *     responses:
  *       200:
  *         description: User statistics fetched successfully
@@ -163,7 +163,7 @@ router.get('/users/stats/summary', adminController.getUserStats);
  *     summary: Get a single user by ID
  *     tags: [Admin]
  *     security:
- *       - bearerAuth: []
+ *       - basicAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -192,7 +192,7 @@ router.get('/users/:id', adminController.getUserById);
  *     summary: Update user details
  *     tags: [Admin]
  *     security:
- *       - bearerAuth: []
+ *       - basicAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -242,7 +242,7 @@ router.put('/users/:id', adminController.updateUser);
  *     summary: Update user role
  *     tags: [Admin]
  *     security:
- *       - bearerAuth: []
+ *       - basicAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -284,7 +284,7 @@ router.patch('/users/:id/role', adminController.updateUserRole);
  *     summary: Update user verification status
  *     tags: [Admin]
  *     security:
- *       - bearerAuth: []
+ *       - basicAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -325,7 +325,7 @@ router.patch('/users/:id/verify', adminController.setUserVerification);
  *     summary: Update user status
  *     tags: [Admin]
  *     security:
- *       - bearerAuth: []
+ *       - basicAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -367,7 +367,7 @@ router.patch('/users/:id/status', adminController.updateUserStatus);
  *     summary: Mark a user account as DELETED
  *     tags: [Admin]
  *     security:
- *       - bearerAuth: []
+ *       - basicAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -398,7 +398,7 @@ router.delete('/users/:id', adminController.deleteUser);
  *     summary: Get all categories with filters and pagination
  *     tags: [Admin]
  *     security:
- *       - bearerAuth: []
+ *       - basicAuth: []
  *     parameters:
  *       - in: query
  *         name: page
@@ -421,7 +421,7 @@ router.delete('/users/:id', adminController.deleteUser);
  *     summary: Create category
  *     tags: [Admin]
  *     security:
- *       - bearerAuth: []
+ *       - basicAuth: []
  */
 router.get('/categories', adminController.getAllCategoriesAdmin);
 router.post('/categories', adminController.createCategoryAdmin);
@@ -433,7 +433,7 @@ router.post('/categories', adminController.createCategoryAdmin);
  *     summary: Get category options for product forms
  *     tags: [Admin]
  *     security:
- *       - bearerAuth: []
+ *       - basicAuth: []
  *     responses:
  *       200:
  *         description: Category options fetched successfully
@@ -449,12 +449,12 @@ router.get('/categories/options', adminController.getAdminCategoryOptions);
  *     summary: Get category by ID
  *     tags: [Admin]
  *     security:
- *       - bearerAuth: []
+ *       - basicAuth: []
  *   put:
  *     summary: Update category
  *     tags: [Admin]
  *     security:
- *       - bearerAuth: []
+ *       - basicAuth: []
  */
 router.get('/categories/:id', adminController.getCategoryByIdAdmin);
 router.put('/categories/:id', adminController.updateCategoryAdmin);
@@ -466,7 +466,7 @@ router.put('/categories/:id', adminController.updateCategoryAdmin);
  *     summary: Update category status
  *     tags: [Admin]
  *     security:
- *       - bearerAuth: []
+ *       - basicAuth: []
  */
 router.patch('/categories/:id/status', adminController.updateCategoryStatusAdmin);
 
@@ -477,7 +477,7 @@ router.patch('/categories/:id/status', adminController.updateCategoryStatusAdmin
  *     summary: Get all products with filters and pagination
  *     tags: [Admin]
  *     security:
- *       - bearerAuth: []
+ *       - basicAuth: []
  *     parameters:
  *       - in: query
  *         name: page
@@ -513,7 +513,7 @@ router.patch('/categories/:id/status', adminController.updateCategoryStatusAdmin
  *     summary: Create a new product
  *     tags: [Admin]
  *     security:
- *       - bearerAuth: []
+ *       - basicAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -568,7 +568,7 @@ router.get('/products/code/:productCode', adminController.getProductByCodeAdmin)
  *     summary: Get product by ID
  *     tags: [Admin]
  *     security:
- *       - bearerAuth: []
+ *       - basicAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -586,7 +586,7 @@ router.get('/products/code/:productCode', adminController.getProductByCodeAdmin)
  *     summary: Update product
  *     tags: [Admin]
  *     security:
- *       - bearerAuth: []
+ *       - basicAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -611,7 +611,7 @@ router.put('/products/:id', adminController.updateProductAdmin);
  *     summary: Get reviews for a specific product
  *     tags: [Admin]
  *     security:
- *       - bearerAuth: []
+ *       - basicAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -652,7 +652,7 @@ router.get('/products/:id/reviews', adminController.getProductReviewsAdmin);
  *     summary: Update product status
  *     tags: [Admin]
  *     security:
- *       - bearerAuth: []
+ *       - basicAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -687,7 +687,7 @@ router.patch('/products/:id/status', adminController.updateProductStatusAdmin);
  *     summary: Update review active status
  *     tags: [Admin]
  *     security:
- *       - bearerAuth: []
+ *       - basicAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -722,12 +722,12 @@ router.patch('/reviews/:id/status', adminController.updateReviewStatusAdmin);
  *     summary: Get hero sliders with filters and pagination
  *     tags: [Admin]
  *     security:
- *       - bearerAuth: []
+ *       - basicAuth: []
  *   post:
  *     summary: Create hero slider
  *     tags: [Admin]
  *     security:
- *       - bearerAuth: []
+ *       - basicAuth: []
  */
 router.get('/hero-sliders', adminController.getHeroSlidersAdmin);
 router.post('/hero-sliders', adminController.createHeroSliderAdmin);
@@ -739,12 +739,12 @@ router.post('/hero-sliders', adminController.createHeroSliderAdmin);
  *     summary: Get hero slider by ID
  *     tags: [Admin]
  *     security:
- *       - bearerAuth: []
+ *       - basicAuth: []
  *   put:
  *     summary: Update hero slider
  *     tags: [Admin]
  *     security:
- *       - bearerAuth: []
+ *       - basicAuth: []
  */
 router.get('/hero-sliders/:id', adminController.getHeroSliderByIdAdmin);
 router.put('/hero-sliders/:id', adminController.updateHeroSliderAdmin);
@@ -756,7 +756,7 @@ router.put('/hero-sliders/:id', adminController.updateHeroSliderAdmin);
  *     summary: Update hero slider status
  *     tags: [Admin]
  *     security:
- *       - bearerAuth: []
+ *       - basicAuth: []
  */
 router.patch('/hero-sliders/:id/status', adminController.updateHeroSliderStatusAdmin);
 
@@ -767,7 +767,7 @@ router.patch('/hero-sliders/:id/status', adminController.updateHeroSliderStatusA
  *     summary: Get site settings singleton
  *     tags: [Admin]
  *     security:
- *       - bearerAuth: []
+ *       - basicAuth: []
  *     responses:
  *       200:
  *         description: Site settings fetched successfully
@@ -777,7 +777,7 @@ router.patch('/hero-sliders/:id/status', adminController.updateHeroSliderStatusA
  *     summary: Update site settings singleton
  *     tags: [Admin]
  *     security:
- *       - bearerAuth: []
+ *       - basicAuth: []
  *     requestBody:
  *       required: true
  *       content:

@@ -178,7 +178,6 @@ router.post('/reset-password/:token', authController.resetPassword);
  *     summary: Get user profile
  *     tags: [Auth]
  *     security:
- *       - bearerAuth: []
  *       - basicAuth: []
  *     responses:
  *       200:

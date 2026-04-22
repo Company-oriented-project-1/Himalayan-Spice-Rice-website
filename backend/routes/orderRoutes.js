@@ -30,6 +30,7 @@ router.use(verifyToken);
  *     tags: [Orders]
  *     security:
  *       - bearerAuth: []
+ *       - basicAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -80,6 +81,7 @@ router.patch('/admin/:id/status', isAdmin, updateOrderStatusAdmin);
  *     tags: [Orders]
  *     security:
  *       - bearerAuth: []
+ *       - basicAuth: []
  *     parameters:
  *       - in: query
  *         name: limit
@@ -106,6 +108,7 @@ router.get('/mine', getMyOrders);
  *     tags: [Orders]
  *     security:
  *       - bearerAuth: []
+ *       - basicAuth: []
  *     parameters:
  *       - in: path
  *         name: orderNumber
@@ -133,6 +136,7 @@ router.get('/:orderNumber', getMyOrderByNumber);
  *     tags: [Orders]
  *     security:
  *       - bearerAuth: []
+ *       - basicAuth: []
  *     requestBody:
  *       required: true
  *       content:
